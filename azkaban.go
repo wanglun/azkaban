@@ -4,27 +4,27 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
-	"github.com/davecgh/go-spew/spew"
 )
 
 var EmptyResponse = errors.New("Empty response")
 
 // Client is the base struct for requests
 type Client struct {
-	Endpoint  string
-	Session   string  `json:"session.id"`
-	Status    string  `json:"status"`
+	Endpoint string
+	Session  string `json:"session.id"`
+	Status   string `json:"status"`
 }
 
 type Detail struct {
-	Error    string  `json:"error"`
-	Status   string  `json:"status"`
-	Message  string  `json:"message"`
+	Error   string `json:"error"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 // New is used to create a new Client based off of the Endpoint
@@ -40,14 +40,14 @@ func (this *Client) action(method, route string, values url.Values, data interfa
 
 	// init vars
 	var (
-		err error
-		request *http.Request
+		err      error
+		request  *http.Request
 		response *http.Response
-		content []byte
+		content  []byte
 	)
 
 	// create request
-	if request, err = http.NewRequest(method, this.Endpoint + route, strings.NewReader(values.Encode())); err == nil {
+	if request, err = http.NewRequest(method, this.Endpoint+route, strings.NewReader(values.Encode())); err == nil {
 
 		defer request.Body.Close()
 
@@ -63,7 +63,7 @@ func (this *Client) action(method, route string, values url.Values, data interfa
 		}
 
 		// init http.Client without ssl verification
-		client := &http.Client{Transport:&http.Transport{TLSClientConfig:&tls.Config{InsecureSkipVerify:true}}}
+		client := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 
 		// do request
 		if response, err = client.Do(request); err == nil {
@@ -94,18 +94,18 @@ func (this *Client) action(method, route string, values url.Values, data interfa
 				} else {
 
 					// check for html response
-					switch err.(type){
+					switch err.(type) {
 
-						case *json.SyntaxError:
+					case *json.SyntaxError:
 
-							if len(content) == 0 {
-								return EmptyResponse
-							}
+						if len(content) == 0 {
+							return EmptyResponse
+						}
 
-							spew.Dump(string(content))
+						spew.Dump(string(content))
 
-							value := reflect.ValueOf(data)
-							value.Elem().SetString(string(content))
+						value := reflect.ValueOf(data)
+						value.Elem().SetString(string(content))
 
 					}
 

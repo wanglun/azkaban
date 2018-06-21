@@ -12,30 +12,30 @@ import (
 	//"github.com/davecgh/go-spew/spew"
 	//"reflect"
 	//"encoding/json"
-	"io"
-	"fmt"
 	"crypto/tls"
+	"fmt"
+	"io"
 )
 
 var ProjectNotFound = errors.New("Project not found")
-var ActionType = struct { Create, Delete string } { "create", "delete" }
-var StatusType = struct { Success, Error string } { "success", "error" }
+var ActionType = struct{ Create, Delete string }{"create", "delete"}
+var StatusType = struct{ Success, Error string }{"success", "error"}
 
 type Project struct {
-	ID    int     `json:"projectId"`
-	Name  string  `json:"project"`
+	ID   int    `json:"projectId"`
+	Name string `json:"project"`
 }
 
 type Object struct {
-	Project  string  `json:"project"`
-	Action   string  `json:"-"`
-	Status   string  `json:"status"`
+	Project string `json:"project"`
+	Action  string `json:"-"`
+	Status  string `json:"status"`
 }
 
 type Upload struct {
-	Error       string  `json:"error"`
-	Version     string  `json:"version"`
-	IdProject   int     `json:"projectId"`
+	Error     string `json:"error"`
+	Version   string `json:"version"`
+	IdProject int    `json:"projectId"`
 }
 
 // The ajax API for getting an existing project.
@@ -48,17 +48,17 @@ func (this *Client) GetProject(name string) (*Project, error) {
 func (this *Client) CreateProject(name, description string) (*Object, error) {
 
 	// init return
-	action := Object {
+	action := Object{
 		Project: name,
-		Action: ActionType.Create,
+		Action:  ActionType.Create,
 	}
 
 	// set form parameters
 	values := url.Values{}
-	values.Add("action","create")
-	values.Add("name",name)
-	values.Add("description",description)
-	values.Add("session.id",this.Session)
+	values.Add("action", "create")
+	values.Add("name", name)
+	values.Add("description", description)
+	values.Add("session.id", this.Session)
 
 	// try to create a project
 	err := this.action(http.MethodPost, "/manager", values, &action)
@@ -71,10 +71,10 @@ func (this *Client) CreateProject(name, description string) (*Object, error) {
 func (this *Client) DeleteProject(name string) (*Object, error) {
 
 	// init return
-	object := Object {
+	object := Object{
 		Project: name,
-		Action: ActionType.Delete,
-		Status: StatusType.Error,
+		Action:  ActionType.Delete,
+		Status:  StatusType.Error,
 	}
 
 	// check if project exists
@@ -85,9 +85,9 @@ func (this *Client) DeleteProject(name string) (*Object, error) {
 
 		// set query string
 		values := url.Values{}
-		values.Add("delete","true")
-		values.Add("project",name)
-		values.Add("session.id",this.Session)
+		values.Add("delete", "true")
+		values.Add("project", name)
+		values.Add("session.id", this.Session)
 
 		// this endpoint does not have a return
 		var html string
@@ -153,7 +153,7 @@ func (this *Client) UploadProjectZip(project, job, file string) error {
 	w.Close()
 
 	// Now that you have a form, you can submit it to your handler.
-	req, err := http.NewRequest(http.MethodPost, this.Endpoint + "/manager", &buff)
+	req, err := http.NewRequest(http.MethodPost, this.Endpoint+"/manager", &buff)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (this *Client) UploadProjectZip(project, job, file string) error {
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	// init http.Client without ssl verification
-	client := &http.Client{Transport:&http.Transport{TLSClientConfig:&tls.Config{InsecureSkipVerify:true}}}
+	client := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 
 	// Submit the request
 	res, err := client.Do(req)

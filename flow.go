@@ -3,71 +3,71 @@ package azkaban
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/metakeule/fmtdate"
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
-	"time"
-	"github.com/metakeule/fmtdate"
 	"os"
-	"fmt"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Flow struct {
-	IdFlow  string  `json:"flowId"`
+	IdFlow string `json:"flowId"`
 }
 
 type Flows struct {
 	Project
-	Flows   []Flow    `json:"flows"`
+	Flows []Flow `json:"flows"`
 }
 
 type Node struct {
-	ID      string    `json:"id"`
-	Type    string    `json:"type"`
-    In      []string  `json:"in"`
+	ID   string   `json:"id"`
+	Type string   `json:"type"`
+	In   []string `json:"in"`
 }
 
 type Jobs struct {
 	Project
-	Flow    string    `json:"flow"`
-	Nodes   []Node    `json:"nodes"`
+	Flow  string `json:"flow"`
+	Nodes []Node `json:"nodes"`
 }
 
 type Execution struct {
-	IdExecution  int         `json:"execId"`
-	IdProject    int         `json:"projectId"`
-	IdFlow       string      `json:"flowId"`
-	User         string      `json:"submitUser"`
-	SubmitTime   int64       `json:"submitTime"`
-	StartTime    int64       `json:"startTime"`
-	EndTime      int64       `json:"endTime"`
-	SubmitAt     time.Time   `json:"submitAt"`
-	StartedAd    time.Time   `json:"startedAd"`
-	FinishedAt   time.Time   `json:"finishedAt"`
-	Status       string      `json:"status"`
+	IdExecution int       `json:"execId"`
+	IdProject   int       `json:"projectId"`
+	IdFlow      string    `json:"flowId"`
+	User        string    `json:"submitUser"`
+	SubmitTime  int64     `json:"submitTime"`
+	StartTime   int64     `json:"startTime"`
+	EndTime     int64     `json:"endTime"`
+	SubmitAt    time.Time `json:"submitAt"`
+	StartedAd   time.Time `json:"startedAd"`
+	FinishedAt  time.Time `json:"finishedAt"`
+	Status      string    `json:"status"`
 }
 
 type Executions struct {
-	Execution    []Execution `json:"executions"`
-	Project      string      `json:"project"`
-	IdProject    int         `json:"projectId"`
-	IdFlow       string      `json:"flow"`
-	Start        int         `json:"from"`
-	Length       int         `json:"length"`
-	Total        int         `json:"total"`
+	Execution []Execution `json:"executions"`
+	Project   string      `json:"project"`
+	IdProject int         `json:"projectId"`
+	IdFlow    string      `json:"flow"`
+	Start     int         `json:"from"`
+	Length    int         `json:"length"`
+	Total     int         `json:"total"`
 }
 
 type Running struct {
-	IdsExecution []string   `json:"execIds"`
+	IdsExecution []string `json:"execIds"`
 }
 
 type Execute struct {
-	IdExecution  int64   `json:"execid"`
-	Message      string  `json:"message"`
-	Project      string  `json:"project"`
-	Flow         string  `json:"flow"`
+	IdExecution int64  `json:"execid"`
+	Message     string `json:"message"`
+	Project     string `json:"project"`
+	Flow        string `json:"flow"`
 }
 
 // used to avoid recursion in UnmarshalJSON below
@@ -78,11 +78,11 @@ func (e *Execution) UnmarshalJSON(b []byte) (err error) {
 
 	x := execution{}
 
-	if err = json.Unmarshal(b,&x); err == nil {
+	if err = json.Unmarshal(b, &x); err == nil {
 		*e = Execution(x)
-		e.SubmitAt = time.Unix(e.SubmitTime/1000,0)
-		e.StartedAd = time.Unix(e.StartTime/1000,0)
-		e.FinishedAt = time.Unix(e.EndTime/1000,0)
+		e.SubmitAt = time.Unix(e.SubmitTime/1000, 0)
+		e.StartedAd = time.Unix(e.StartTime/1000, 0)
+		e.FinishedAt = time.Unix(e.EndTime/1000, 0)
 		return
 	}
 
@@ -91,7 +91,8 @@ func (e *Execution) UnmarshalJSON(b []byte) (err error) {
 
 // create a new Decode for Execution
 func Decode(r io.Reader) (exe *Execution, err error) {
-	exe = new(Execution); return
+	exe = new(Execution)
+	return
 }
 
 func (this *Client) CreateCommandJob(project, job string, commands ...string) error {
@@ -100,7 +101,7 @@ func (this *Client) CreateCommandJob(project, job string, commands ...string) er
 	temp := "/tmp/"
 
 	// windows?
-	if strings.Contains(os.Getenv("OS"),"Windows") {
+	if strings.Contains(os.Getenv("OS"), "Windows") {
 		temp = "C:\\Windows\\Temp\\"
 	}
 
@@ -140,9 +141,9 @@ func (this *Client) FetchFlows(project string) (*Flows, error) {
 
 	// set form parameters
 	values := url.Values{}
-	values.Add("ajax","fetchprojectflows")
-	values.Add("session.id",this.Session)
-	values.Add("project",project)
+	values.Add("ajax", "fetchprojectflows")
+	values.Add("session.id", this.Session)
+	values.Add("project", project)
 
 	// try to get project flows
 	err := this.action(http.MethodGet, "/manager", values, &flows)
@@ -171,10 +172,10 @@ func (this *Client) FetchJobs(project, flow string) (*Jobs, error) {
 
 		// set form parameters
 		values := url.Values{}
-		values.Add("ajax","fetchflowgraph")
-		values.Add("session.id",this.Session)
-		values.Add("project",project)
-		values.Add("flow",flow)
+		values.Add("ajax", "fetchflowgraph")
+		values.Add("session.id", this.Session)
+		values.Add("project", project)
+		values.Add("flow", flow)
 
 		// try to get project flows
 		err = this.action(http.MethodGet, "/manager", values, &jobs)
@@ -202,12 +203,12 @@ func (this *Client) FetchExecutions(project, flow string, start, length int) (*E
 
 		// set form parameters
 		values := url.Values{}
-		values.Add("ajax","fetchFlowExecutions")
-		values.Add("session.id",this.Session)
-		values.Add("project",project)
-		values.Add("flow",flow)
-		values.Add("start",strconv.Itoa(start))
-		values.Add("length",strconv.Itoa(length))
+		values.Add("ajax", "fetchFlowExecutions")
+		values.Add("session.id", this.Session)
+		values.Add("project", project)
+		values.Add("flow", flow)
+		values.Add("start", strconv.Itoa(start))
+		values.Add("length", strconv.Itoa(length))
 
 		// try to get project flows
 		err = this.action(http.MethodGet, "/manager", values, &executions)
@@ -232,10 +233,10 @@ func (this *Client) FetchRunningExecutions(project, flow string) (*Running, erro
 
 		// set form parameters
 		values := url.Values{}
-		values.Add("ajax","getRunning")
-		values.Add("session.id",this.Session)
-		values.Add("project",project)
-		values.Add("flow",flow)
+		values.Add("ajax", "getRunning")
+		values.Add("session.id", this.Session)
+		values.Add("project", project)
+		values.Add("flow", flow)
 
 		// try to get project flows
 		err = this.action(http.MethodGet, "/executor", values, &running)
@@ -260,10 +261,10 @@ func (this *Client) ExecuteFlow(project, flow string) (*Execute, error) {
 
 		// set form parameters
 		values := url.Values{}
-		values.Add("ajax","executeFlow")
-		values.Add("session.id",this.Session)
-		values.Add("project",project)
-		values.Add("flow",flow)
+		values.Add("ajax", "executeFlow")
+		values.Add("session.id", this.Session)
+		values.Add("project", project)
+		values.Add("flow", flow)
 
 		// try to get project flows
 		err = this.action(http.MethodGet, "/executor", values, &execute)
@@ -275,7 +276,7 @@ func (this *Client) ExecuteFlow(project, flow string) (*Execute, error) {
 }
 
 // Given an execution id, this API call cancels a running flow. If the flow is not running, it will return an error message.
-func (this *Client) CancelFlow(project, flow string) (error) {
+func (this *Client) CancelFlow(project, flow string) error {
 
 	// check if project exists
 	_, err := this.GetProject(project)
@@ -285,10 +286,10 @@ func (this *Client) CancelFlow(project, flow string) (error) {
 
 		// set form parameters
 		values := url.Values{}
-		values.Add("ajax","cancelFlow")
-		values.Add("session.id",this.Session)
-		values.Add("project",project)
-		values.Add("flow",flow)
+		values.Add("ajax", "cancelFlow")
+		values.Add("session.id", this.Session)
+		values.Add("project", project)
+		values.Add("flow", flow)
 
 		// an empty struct will return if succeeds
 		var response map[string]string
@@ -314,15 +315,15 @@ func (this *Client) ScheduleFlow(project *Project, flow string, schedule time.Ti
 
 	// set form parameters
 	values := url.Values{}
-	values.Add("ajax","scheduleFlow")
-	values.Add("session.id",this.Session)
-	values.Add("projectId",strconv.Itoa(project.ID))
-	values.Add("projectName",project.Name)
-	values.Add("flow",flow)
-	values.Add("scheduleTime",fmtdate.Format("hh,mm,pm,ZZZ",schedule))
-	values.Add("scheduleDate",fmtdate.Format("MM/DD/YYYY",schedule))
-	values.Add("is_recurring",repeat)
-	values.Add("period",period)
+	values.Add("ajax", "scheduleFlow")
+	values.Add("session.id", this.Session)
+	values.Add("projectId", strconv.Itoa(project.ID))
+	values.Add("projectName", project.Name)
+	values.Add("flow", flow)
+	values.Add("scheduleTime", fmtdate.Format("hh,mm,pm,ZZZ", schedule))
+	values.Add("scheduleDate", fmtdate.Format("MM/DD/YYYY", schedule))
+	values.Add("is_recurring", repeat)
+	values.Add("period", period)
 
 	// an empty struct will return if succeeds
 	var detail Detail
@@ -339,15 +340,15 @@ func (this *Client) UnscheduleFlow(project *Project, flow string, schedule time.
 
 	// set form parameters
 	values := url.Values{}
-	values.Add("ajax","scheduleFlow")
-	values.Add("session.id",this.Session)
-	values.Add("projectId",strconv.Itoa(project.ID))
-	values.Add("projectName",project.Name)
-	values.Add("flow",flow)
-	values.Add("scheduleTime",fmtdate.Format("hh,mm,pm,ZZZ",schedule))
-	values.Add("scheduleDate",fmtdate.Format("MM/DD/YYYY",schedule))
-	values.Add("is_recurring",repeat)
-	values.Add("period",period)
+	values.Add("ajax", "scheduleFlow")
+	values.Add("session.id", this.Session)
+	values.Add("projectId", strconv.Itoa(project.ID))
+	values.Add("projectName", project.Name)
+	values.Add("flow", flow)
+	values.Add("scheduleTime", fmtdate.Format("hh,mm,pm,ZZZ", schedule))
+	values.Add("scheduleDate", fmtdate.Format("MM/DD/YYYY", schedule))
+	values.Add("is_recurring", repeat)
+	values.Add("period", period)
 
 	// an empty struct will return if succeeds
 	var detail Detail

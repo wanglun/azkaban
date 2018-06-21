@@ -2,10 +2,10 @@ package azkaban
 
 import (
 	"archive/zip"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
-	"fmt"
 	"strconv"
 )
 
@@ -37,9 +37,9 @@ func WriteFile(path string, commands ...string) error {
 		line := "command%s\n"
 
 		if i > 0 {
-			line = fmt.Sprintf(line, "." + strconv.Itoa(i) + "=" + cmd)
+			line = fmt.Sprintf(line, "."+strconv.Itoa(i)+"="+cmd)
 		} else {
-			line = fmt.Sprintf(line, "=" + cmd)
+			line = fmt.Sprintf(line, "="+cmd)
 		}
 
 		if _, err = file.WriteString(line); err != nil {
