@@ -44,7 +44,7 @@ type Execution struct {
 	StartTime   int64     `json:"startTime"`
 	EndTime     int64     `json:"endTime"`
 	SubmitAt    time.Time `json:"submitAt"`
-	StartedAd   time.Time `json:"startedAd"`
+	StartedAt   time.Time `json:"startedAt"`
 	FinishedAt  time.Time `json:"finishedAt"`
 	Status      string    `json:"status"`
 }
@@ -81,7 +81,7 @@ func (e *Execution) UnmarshalJSON(b []byte) (err error) {
 	if err = json.Unmarshal(b, &x); err == nil {
 		*e = Execution(x)
 		e.SubmitAt = time.Unix(e.SubmitTime/1000, 0)
-		e.StartedAd = time.Unix(e.StartTime/1000, 0)
+		e.StartedAt = time.Unix(e.StartTime/1000, 0)
 		e.FinishedAt = time.Unix(e.EndTime/1000, 0)
 		return
 	}
