@@ -120,7 +120,7 @@ func (this *Client) CreateCommandJob(project, job string, commands ...string) er
 	}
 
 	// upload zip file to project
-	if err := this.UploadProjectZip(project, job, zipname); err != nil {
+	if err := this.UploadProjectZip(project, zipname); err != nil {
 		return err
 	}
 

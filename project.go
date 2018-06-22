@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	//"io/ioutil"
 	//"crypto/tls"
 	//"github.com/davecgh/go-spew/spew"
@@ -110,7 +111,7 @@ func (this *Client) DeleteProject(name string) (*Object, error) {
 
 }
 
-func (this *Client) UploadProjectZip(project, job, file string) error {
+func (this *Client) UploadProjectZip(project, file string) error {
 
 	// Prepare a form that you will submit to azkaban
 	var buff bytes.Buffer
@@ -122,7 +123,7 @@ func (this *Client) UploadProjectZip(project, job, file string) error {
 	if err != nil {
 		return err
 	}
-	fw, err := w.CreateFormFile("file", file)
+	fw, err := w.CreateFormFile("file", filepath.Base(file))
 	if err != nil {
 		return err
 	}
