@@ -1,0 +1,3 @@
+type=command
+command=echo "hello bar"
+dependencies=foo

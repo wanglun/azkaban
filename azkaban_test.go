@@ -11,7 +11,9 @@ const AZKABAN_ENDPOINT = "AZKABAN_ENDPOINT"
 const AZKABAN_USER = "AZKABAN_USER"
 const AZKABAN_PASS = "AZKABAN_PASS"
 
-const PROJECT_NAME = "test"
+const PROJECT_NAME = "test_client"
+const PROJECT_DESC = "project for client testing"
+const FLOW_ZIP_PATH = "./testdata/testflow.zip"
 
 func TestClient(t *testing.T) {
 	endpoint := os.Getenv(AZKABAN_ENDPOINT)
@@ -25,9 +27,18 @@ func TestClient(t *testing.T) {
 	err := client.Authenticate(user, pass)
 	assert.Nil(t, err)
 
-	project, err := client.GetProject(PROJECT_NAME)
+	// create project
+	_, err = client.GetProject(PROJECT_NAME)
+	if err == nil {
+		_, err = client.DeleteProject(PROJECT_NAME)
+		assert.Nil(t, err)
+	}
+	_, err = client.CreateProject(PROJECT_NAME, PROJECT_DESC)
 	assert.Nil(t, err)
-	t.Logf("%#v", project)
+
+	// upload flow
+	err = client.UploadProjectZip(PROJECT_NAME, FLOW_ZIP_PATH)
+	assert.Nil(t, err)
 
 	// flows
 	flows, err := client.FetchFlows(PROJECT_NAME)
