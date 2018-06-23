@@ -1,2 +1,2 @@
 type=command
-command=echo "hello foo"
+command=echo "hello foo, p1:" ${test.p1}

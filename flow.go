@@ -73,6 +73,14 @@ type Execute struct {
 // used to avoid recursion in UnmarshalJSON below
 type execution Execution
 
+// ExecuteFlow concurrentOption
+type concurrentOption string
+
+const ConcurrentOptionDefault = concurrentOption("")
+const ConcurrentOptionIgnore = concurrentOption("ignore")
+const ConcurrentOptionPipeline = concurrentOption("pipeline")
+const ConcurrentOptionSkip = concurrentOption("skip")
+
 // override json.Unmarshal for Execution
 func (e *Execution) UnmarshalJSON(b []byte) (err error) {
 
@@ -248,7 +256,7 @@ func (this *Client) FetchRunningExecutions(project, flow string) (*Running, erro
 }
 
 // This API executes a flow via an ajax call, supporting a rich selection of different options.
-func (this *Client) ExecuteFlow(project, flow string) (*Execute, error) {
+func (this *Client) ExecuteFlow(project, flow string, concurrentOption concurrentOption, flowOverrides map[string]string) (*Execute, error) {
 
 	// init return
 	var execute Execute
@@ -265,6 +273,12 @@ func (this *Client) ExecuteFlow(project, flow string) (*Execute, error) {
 		values.Add("session.id", this.Session)
 		values.Add("project", project)
 		values.Add("flow", flow)
+		if concurrentOption != ConcurrentOptionDefault {
+			values.Add("concurrentOption", string(concurrentOption))
+		}
+		for k, v := range flowOverrides {
+			values.Add(fmt.Sprintf("flowOverride[%s]", k), v)
+		}
 
 		// try to get project flows
 		err = this.action(http.MethodGet, "/executor", values, &execute)

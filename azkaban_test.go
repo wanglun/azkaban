@@ -53,7 +53,12 @@ func TestClient(t *testing.T) {
 	t.Logf("%#v", jobs)
 
 	// execute flow
-	execute, err := client.ExecuteFlow(PROJECT_NAME, flow_id)
+	execute, err := client.ExecuteFlow(PROJECT_NAME, flow_id, ConcurrentOptionDefault, nil)
+	assert.Nil(t, err)
+	t.Logf("%#v", execute)
+
+	// execute flow with override properties
+	execute, err = client.ExecuteFlow(PROJECT_NAME, flow_id, ConcurrentOptionIgnore, map[string]string{"test.p1": "100", "test.p2": "p2_overrided"})
 	assert.Nil(t, err)
 	t.Logf("%#v", execute)
 }
