@@ -70,6 +70,12 @@ type Execute struct {
 	Flow        string `json:"flow"`
 }
 
+type Logs struct {
+	Data   string `json:"data"`
+	Length int    `json:"length"`
+	Offset int    `json:"offset"`
+}
+
 // used to avoid recursion in UnmarshalJSON below
 type execution Execution
 
@@ -371,5 +377,28 @@ func (this *Client) UnscheduleFlow(project *Project, flow string, schedule time.
 	err := this.action(http.MethodPost, "/schedule", values, &detail)
 
 	return &detail, err
+
+}
+
+// Given an execution id and a job id, this API call fetches the correponding job logs.
+// The log text can be quite large sometimes, so this API call also expects the parameters offset and length to be specified.
+func (this *Client) FetchExecutionJobLogs(executionId int64, jobId string, offset, length int) (*Logs, error) {
+
+	// init return
+	var logs Logs
+
+	// set form parameters
+	values := url.Values{}
+	values.Add("ajax", "fetchExecJobLogs")
+	values.Add("session.id", this.Session)
+	values.Add("execid", strconv.FormatInt(executionId, 10))
+	values.Add("jobId", jobId)
+	values.Add("offset", strconv.Itoa(offset))
+	values.Add("length", strconv.Itoa(length))
+
+	// try to get project flows
+	err := this.action(http.MethodGet, "/executor", values, &logs)
+
+	return &logs, err
 
 }

@@ -3,6 +3,7 @@ package azkaban
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -61,4 +62,10 @@ func TestClient(t *testing.T) {
 	execute, err = client.ExecuteFlow(PROJECT_NAME, flow_id, ConcurrentOptionIgnore, map[string]string{"test.p1": "100", "test.p2": "p2_overrided"})
 	assert.Nil(t, err)
 	t.Logf("%#v", execute)
+
+	// fetch job logs
+	time.Sleep(time.Second)
+	logs, err := client.FetchExecutionJobLogs(execute.IdExecution, jobs.Nodes[0].ID, 0, 1000)
+	assert.Nil(t, err)
+	t.Logf("%#v", logs)
 }
